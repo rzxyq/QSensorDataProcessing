@@ -1,0 +1,29 @@
+{
+  "name": "qsensorserver",
+  "authors": [
+    "Jma353 <jma353@cornell.edu>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.2",
+    "jquery": "~2.1.3", 
+    "react": "~0.12.2",
+    "animo.js": "*", 
+    "underscore": "*",
+    "jquery.scrollTo": "*",
+    "js-cookie": "*", 
+    "typed.js": "*",
+    "d3": "*"
+  }
+}
