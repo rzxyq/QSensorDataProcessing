@@ -15,6 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist # To catch when this happe
 from django.contrib import auth  # For logging admin in 
 import datetime 
 from django.views.decorators.csrf import csrf_exempt
+from datetime import datetime
 
 
 @csrf_exempt
@@ -99,7 +100,7 @@ class ResultView(View):
                                                 y_coord=result.y_coord,
                                                 z_coord=result.z_coord,
                                                 eda=result.eda,
-                                                trial=trial)
+                                                trial=Trial(name='fixing_bug', date=datetime.now()))
 
                 new_data.save()
 
@@ -118,45 +119,18 @@ class ResultView(View):
 @csrf_exempt
 def post_graph(request): 
     json_data = json.loads(request.body.decode('utf-8'))
-    if json_data.get('trial_num'): 
-        trial_num = json_data.get('trial_num')
-        # result = Data.objects.get(pk=1)
-        result = Data.objects.all().last() #return last object only
-        import ipdb; ipdb.set_trace()
-        try: 
+    # if json_data.get('trial_num'): 
+    result = Data.objects.all().last() #return last object only
 
-            trial = Trial.objects.get(pk=trial_num)
-            new_data = Data(data_text=result.data_text,
-                                            x_coord=result.x_coord,
-                                            y_coord=result.y_coord,
-                                            z_coord=result.z_coord,
-                                            eda=result.eda,
-                                            trial=trial_num)
+    json_result = { 
+                        "data_text": result.data_text,
+                        "x": result.x_coord,
+                        "y": result.y_coord,
+                        "z": result.z_coord,
+                        "eda": result.eda
+                    }
 
-            new_data.save()
-
-        except Exception: 
-            trial = Trial(pk=trial_num, name="Trial Number " + str(trial_num), date=datetime.datetime.now())
-            trial.save() 
-
-            new_data = Data(data_text=result.data_text,
-                                            x_coord=result.x_coord,
-                                            y_coord=result.y_coord,
-                                            z_coord=result.z_coord,
-                                            eda=result.eda,
-                                            trial=trial)
-
-            new_data.save()
-
-        json_result = { 
-                            "data_text": result.data_text,
-                            "x": result.x_coord,
-                            "y": result.y_coord,
-                            "z": result.z_coord,
-                            "eda": result.eda
-                        }
-
-        return JsonResponse(json_result)
+    return JsonResponse(json_result)
     return JsonResponse({ "none": "none" })
 
 
