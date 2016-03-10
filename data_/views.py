@@ -19,9 +19,15 @@ from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
 def post_data(request): 
-    json_data = json.loads(request.body)
+    json_data = json.loads(request.body.decode('utf-8'))
+    # import ipdb; ipdb.set_trace()
     if json_data.get('data'):
-        target = Data.objects.get(pk=1)
+        # try:
+        #     target = Data.objects.get(pk=1)
+        # except:
+        #     print('pk=1 doesnnt exist')
+        target = Data()
+
         target.data_text = json_data.get('data')
 
         # Populate the object with information 
@@ -32,6 +38,7 @@ def post_data(request):
         target.unknown = json_data.get('unknown')
         target.temp = json_data.get('temp')
         target.eda = json_data.get('eda')
+        target.trial = json_data.get('trial')
         target.save() 
         return JsonResponse({ "success": True })
     else: 
@@ -67,7 +74,7 @@ class ResultView(View):
 
 
     def post(self, request): 
-        json_data = json.loads(request.body)
+        json_data = json.loads(request.body.decode('utf-8'))
         if json_data.get('trial_num'): 
             trial_num = json_data.get('trial_num')
             result = Data.objects.get(pk=1)
@@ -110,10 +117,12 @@ class ResultView(View):
 
 @csrf_exempt
 def post_graph(request): 
-    json_data = json.loads(request.body)
+    json_data = json.loads(request.body.decode('utf-8'))
     if json_data.get('trial_num'): 
         trial_num = json_data.get('trial_num')
-        result = Data.objects.get(pk=1)
+        # result = Data.objects.get(pk=1)
+        result = Data.objects.all().last() #return last object only
+        import ipdb; ipdb.set_trace()
         try: 
 
             trial = Trial.objects.get(pk=trial_num)
