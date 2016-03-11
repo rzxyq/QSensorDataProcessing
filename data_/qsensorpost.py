@@ -7,7 +7,7 @@ from time import sleep
 while(True): 
     # url = "http://127.0.0.1:8000/data/post_data"
     
-    url = "https://qsensorserver.herokuapp.com/data/post_data"
+    url = "https://qsensorserver2.herokuapp.com/data/post_data"
 
     fileHandle = open('./screenlog.0')
     lineList = fileHandle.readlines()
@@ -34,8 +34,6 @@ while(True):
             'unknown': data_array[4],
             'temp': data_array[5],
             'eda': data_array[6],
-
-
         }
 
     # Catch any exceptions as necessary 

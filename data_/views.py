@@ -17,6 +17,17 @@ import datetime
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 
+#eda imports
+import numpy as np
+import sys
+from scipy.ndimage import filters
+import re
+import csv
+import time
+
+TIME_WINDOW = 4 #in minutes
+POINTS = TIME_WINDOW*60*0.3 #number of data points considered when calculating feature vectors
+
 
 @csrf_exempt
 def post_data(request): 
@@ -40,11 +51,31 @@ def post_data(request):
         target.temp = json_data.get('temp')
         target.eda = json_data.get('eda')
         target.trial = json_data.get('trial')
+
+        #data processing
+        print(time.time() * 1000) #print current time in miliseconds
+        last_window = Data.objects.all().order_by('-id')[:POINTS]
+        window_eda = []
+        for point in last_window:
+            if point.eda != None:
+                window_eda.append(point.eda)
+        target.mean, target.sums, target.frequency = get_simple_vals(window_eda)
+
         target.save() 
         return JsonResponse({ "success": True })
     else: 
         return JsonResponse({ "failure": True })
 
+def get_simple_vals(eda_array):
+    """Takes in an array of eda values, returns a list containing one value for the mean, one for the sum, and one for the peak frequency."""
+
+    mean_ppa = sum(eda_array)/len(eda_array)
+    sum_ppa = sum(eda_array)
+    freq = len(eda_array)
+
+    the_features = [mean_ppa, sum_ppa, freq]
+
+    return the_features
 
 
 class Results(View):
@@ -56,7 +87,10 @@ class Results(View):
                                         "x": result.x_coord,
                                         "y": result.y_coord,
                                         "z": result.z_coord,
-                                        "eda": result.eda
+                                        "eda": result.eda,
+                                        "mean": result.mean,
+                                        "frequency": result.frequency,
+                                        "sums": result.sums
                                     }
         return JsonResponse(json_result); 
     
@@ -67,7 +101,7 @@ class Results(View):
 
 class ResultView(View):
 
-
+    import ipdb; ipdb.set_trace()
     def get(self, request): 
         template = loader.get_template('results.html')
         context = {}
@@ -75,6 +109,7 @@ class ResultView(View):
 
 
     def post(self, request): 
+        import ipdb; ipdb.set_trace()
         json_data = json.loads(request.body.decode('utf-8'))
         if json_data.get('trial_num'): 
             trial_num = json_data.get('trial_num')
@@ -115,6 +150,57 @@ class ResultView(View):
             return JsonResponse(json_result)
         return JsonResponse({ "none": "none" })
 
+class ResultView_mean(View):
+
+
+    def get(self, request): 
+        template = loader.get_template('results_mean.html')
+        context = {}
+        return HttpResponse(template.render(context, request))
+
+
+    def post(self, request): 
+        import ipdb; ipdb.set_trace()
+        json_data = json.loads(request.body.decode('utf-8'))
+        if json_data.get('trial_num'): 
+            trial_num = json_data.get('trial_num')
+            result = Data.objects.get(pk=1)
+            try: 
+
+                trial = Trial.objects.get(pk=trial_num)
+                new_data = Data(data_text=result.data_text,
+                                                x_coord=result.x_coord,
+                                                y_coord=result.y_coord,
+                                                z_coord=result.z_coord,
+                                                mean=result.mean,
+                                                trial=trial_num)
+
+                new_data.save()
+
+            except Exception: 
+                trial = Trial(pk=trial_num, name="Trial Number " + str(trial_num), date=datetime.datetime.now())
+                trial.save() 
+
+                new_data = Data(data_text=result.data_text,
+                                                x_coord=result.x_coord,
+                                                y_coord=result.y_coord,
+                                                z_coord=result.z_coord,
+                                                mean=result.mean,
+                                                trial=Trial(name='fixing_bug', date=datetime.now()))
+
+                new_data.save()
+
+            json_result = { 
+                                "data_text": result.data_text,
+                                "x": result.x_coord,
+                                "y": result.y_coord,
+                                "z": result.z_coord,
+                                "mean": result.mean
+                            }
+
+            return JsonResponse(json_result)
+        return JsonResponse({ "none": "none" })
+
 
 @csrf_exempt
 def post_graph(request): 
@@ -133,12 +219,58 @@ def post_graph(request):
     return JsonResponse(json_result)
     return JsonResponse({ "none": "none" })
 
+@csrf_exempt
+def frequency_post_graph(request): 
+    json_data = json.loads(request.body.decode('utf-8'))
+    # if json_data.get('trial_num'): 
+    result = Data.objects.all().last() #return last object only
+
+    json_result = { 
+                        "data_text": result.data_text,
+                        "x": result.x_coord,
+                        "y": result.y_coord,
+                        "z": result.z_coord,
+                        "frequency": result.frequency
+                    }
+
+    return JsonResponse(json_result)
+    return JsonResponse({ "none": "none" })
+
+@csrf_exempt
+def sums_post_graph(request): 
+    json_data = json.loads(request.body.decode('utf-8'))
+    # if json_data.get('trial_num'): 
+    result = Data.objects.all().last() #return last object only
+
+    json_result = { 
+                        "data_text": result.data_text,
+                        "x": result.x_coord,
+                        "y": result.y_coord,
+                        "z": result.z_coord,
+                        "sums": result.sums
+                    }
+
+    return JsonResponse(json_result)
+    return JsonResponse({ "none": "none" })
 
 
+@csrf_exempt
+def mean_post_graph(request): 
+    import ipdb; ipdb.set_trace()
+    json_data = json.loads(request.body.decode('utf-8'))
+    # if json_data.get('trial_num'): 
+    result = Data.objects.all().last() #return last object only
 
+    json_result = { 
+                        "data_text": result.data_text,
+                        "x": result.x_coord,
+                        "y": result.y_coord,
+                        "z": result.z_coord,
+                        "mean": result.mean
+                    }
 
-
-
+    return JsonResponse(json_result)
+    return JsonResponse({ "none": "none" })
 
 
 
