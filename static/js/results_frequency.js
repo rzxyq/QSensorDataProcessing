@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
 
-
+    var Y_RANGE = 200
     // Deals with CSRF resolution on AJAX request 
     var csrftoken = Cookies.get('csrftoken'); // Received from the CSRF 
     
@@ -39,7 +39,7 @@ $(document).ready(function() {
 
 
     // y-scale 
-    var y = d3.scale.linear().domain([1.5,0]).range([0,height]); 
+    var y = d3.scale.linear().domain([Y_RANGE,0]).range([0,height]); 
 
 
     // x-axis 
