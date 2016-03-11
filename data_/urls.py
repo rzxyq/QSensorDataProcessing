@@ -4,7 +4,10 @@ from .views import *
 urlpatterns = [
         url(r'^results', Results.as_view()),
         url(r'^result_view',ResultView.as_view()), # To receive 
-        url(r'^result_view_mean',ResultView_mean.as_view()), # To receive 
+        url(r'^mean_result_view',ResultView_mean.as_view()), # To receive 
+        url(r'^frequency_result_view',ResultView_frequency.as_view()), # To receive 
+        url(r'^sums_result_view',ResultView_sums.as_view()), # To receive 
+
 
         url(r'^post_data', post_data), # To receive data POSTs 
 

@@ -32,7 +32,6 @@ POINTS = TIME_WINDOW*60*0.3 #number of data points considered when calculating f
 @csrf_exempt
 def post_data(request): 
     json_data = json.loads(request.body.decode('utf-8'))
-    # import ipdb; ipdb.set_trace()
     if json_data.get('data'):
         # try:
         #     target = Data.objects.get(pk=1)
@@ -101,7 +100,6 @@ class Results(View):
 
 class ResultView(View):
 
-    import ipdb; ipdb.set_trace()
     def get(self, request): 
         template = loader.get_template('results.html')
         context = {}
@@ -109,7 +107,6 @@ class ResultView(View):
 
 
     def post(self, request): 
-        import ipdb; ipdb.set_trace()
         json_data = json.loads(request.body.decode('utf-8'))
         if json_data.get('trial_num'): 
             trial_num = json_data.get('trial_num')
@@ -160,7 +157,6 @@ class ResultView_mean(View):
 
 
     def post(self, request): 
-        import ipdb; ipdb.set_trace()
         json_data = json.loads(request.body.decode('utf-8'))
         if json_data.get('trial_num'): 
             trial_num = json_data.get('trial_num')
@@ -201,6 +197,105 @@ class ResultView_mean(View):
             return JsonResponse(json_result)
         return JsonResponse({ "none": "none" })
 
+class ResultView_sums(View):
+
+
+    def get(self, request): 
+        template = loader.get_template('results_sums.html')
+        context = {}
+        return HttpResponse(template.render(context, request))
+
+
+    def post(self, request): 
+        json_data = json.loads(request.body.decode('utf-8'))
+        if json_data.get('trial_num'): 
+            trial_num = json_data.get('trial_num')
+            result = Data.objects.get(pk=1)
+            try: 
+
+                trial = Trial.objects.get(pk=trial_num)
+                new_data = Data(data_text=result.data_text,
+                                                x_coord=result.x_coord,
+                                                y_coord=result.y_coord,
+                                                z_coord=result.z_coord,
+                                                sums=result.sums,
+                                                trial=trial_num)
+
+                new_data.save()
+
+            except Exception: 
+                trial = Trial(pk=trial_num, name="Trial Number " + str(trial_num), date=datetime.datetime.now())
+                trial.save() 
+
+                new_data = Data(data_text=result.data_text,
+                                                x_coord=result.x_coord,
+                                                y_coord=result.y_coord,
+                                                z_coord=result.z_coord,
+                                                sums=result.sums,
+                                                trial=Trial(name='fixing_bug', date=datetime.now()))
+
+                new_data.save()
+
+            json_result = { 
+                                "data_text": result.data_text,
+                                "x": result.x_coord,
+                                "y": result.y_coord,
+                                "z": result.z_coord,
+                                "sums": result.sums,
+                            }
+
+            return JsonResponse(json_result)
+        return JsonResponse({ "none": "none" })
+
+class ResultView_frequency(View):
+
+
+    def get(self, request): 
+        template = loader.get_template('results_frequency.html')
+        context = {}
+        return HttpResponse(template.render(context, request))
+
+
+    def post(self, request): 
+        json_data = json.loads(request.body.decode('utf-8'))
+        if json_data.get('trial_num'): 
+            trial_num = json_data.get('trial_num')
+            result = Data.objects.get(pk=1)
+            try: 
+
+                trial = Trial.objects.get(pk=trial_num)
+                new_data = Data(data_text=result.data_text,
+                                                x_coord=result.x_coord,
+                                                y_coord=result.y_coord,
+                                                z_coord=result.z_coord,
+                                                frequency=result.frequency,
+                                                trial=trial_num)
+
+                new_data.save()
+
+            except Exception: 
+                trial = Trial(pk=trial_num, name="Trial Number " + str(trial_num), date=datetime.datetime.now())
+                trial.save() 
+
+                new_data = Data(data_text=result.data_text,
+                                                x_coord=result.x_coord,
+                                                y_coord=result.y_coord,
+                                                z_coord=result.z_coord,
+                                                frequency=result.frequency,
+                                                trial=Trial(name='fixing_bug', date=datetime.now()))
+
+                new_data.save()
+
+            json_result = { 
+                                "data_text": result.data_text,
+                                "x": result.x_coord,
+                                "y": result.y_coord,
+                                "z": result.z_coord,
+                                "frequency": result.frequency
+                            }
+
+            return JsonResponse(json_result)
+        return JsonResponse({ "none": "none" })
 
 @csrf_exempt
 def post_graph(request): 
@@ -256,7 +351,6 @@ def sums_post_graph(request):
 
 @csrf_exempt
 def mean_post_graph(request): 
-    import ipdb; ipdb.set_trace()
     json_data = json.loads(request.body.decode('utf-8'))
     # if json_data.get('trial_num'): 
     result = Data.objects.all().last() #return last object only

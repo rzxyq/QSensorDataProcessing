@@ -39,7 +39,7 @@ $(document).ready(function() {
 
 
     // y-scale 
-    var y = d3.scale.linear().domain([1.5,0]).range([0,height]); 
+    var y = d3.scale.linear().domain([200,0]).range([0,height]); 
 
 
     // x-axis 
