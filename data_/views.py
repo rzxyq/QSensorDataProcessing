@@ -16,6 +16,8 @@ from django.contrib import auth  # For logging admin in
 import datetime 
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
+import peakutils
+
 
 #eda imports
 import numpy as np
@@ -24,6 +26,7 @@ from scipy.ndimage import filters
 import re
 import csv
 import time
+
 
 TIME_WINDOW = 4 #in minutes
 POINTS = TIME_WINDOW*60*0.3 #number of data points considered when calculating feature vectors
@@ -65,12 +68,17 @@ def post_data(request):
     else: 
         return JsonResponse({ "failure": True })
 
+
 def get_simple_vals(eda_array):
     """Takes in an array of eda values, returns a list containing one value for the mean, one for the sum, and one for the peak frequency."""
+    eda_array = np.array(eda_array)
+    indexes = peakutils.indexes(eda_array, thres=np.mean(eda_array), min_dist=10)
 
-    mean_ppa = sum(eda_array)/len(eda_array)
-    sum_ppa = sum(eda_array)
-    freq = len(eda_array)
+    if len(indexes) == 0:
+        return [0,0,0]
+    mean_ppa = sum(indexes)/len(indexes)
+    sum_ppa = sum(indexes)
+    freq = len(indexes)
 
     the_features = [mean_ppa, sum_ppa, freq]
 
